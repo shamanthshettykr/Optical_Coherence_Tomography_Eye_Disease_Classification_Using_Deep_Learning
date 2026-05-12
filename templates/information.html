@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}OculoAI – OCT Information{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1><i class="fa-solid fa-book-medical"></i> OCT &amp; Eye Disease Guide</h1>
+    <p>Everything you need to know about Optical Coherence Tomography and the 7 conditions this system detects.</p>
+</div>
+
+<!-- What is OCT -->
+<section class="info-section glass-card fade-in">
+    <div class="info-section__icon" style="background:rgba(79,142,247,.15);color:var(--primary);">
+        <i class="fa-solid fa-microscope"></i>
+    </div>
+    <div class="info-section__body">
+        <h2>What is OCT?</h2>
+        <p>
+            <strong>Optical Coherence Tomography (OCT)</strong> is a non-invasive imaging technique
+            that uses light waves to capture high-resolution, cross-sectional images of the retina —
+            the light-sensitive tissue at the back of the eye. It works similarly to ultrasound but
+            uses light instead of sound, achieving micrometer-level resolution.
+        </p>
+        <p>
+            OCT allows ophthalmologists to see each of the retina's distinctive layers, enabling
+            early detection and monitoring of conditions such as macular degeneration, diabetic
+            eye disease, glaucoma, and retinal vascular disorders. A typical scan takes only a few
+            seconds and is completely painless.
+        </p>
+        <div class="info-tags">
+            <span class="tag"><i class="fa-solid fa-bolt"></i> Non-invasive</span>
+            <span class="tag"><i class="fa-solid fa-ruler"></i> Micron resolution</span>
+            <span class="tag"><i class="fa-solid fa-clock"></i> Seconds to acquire</span>
+            <span class="tag"><i class="fa-solid fa-layer-group"></i> Layer-by-layer imaging</span>
+        </div>
+    </div>
+</section>
+
+<!-- 7 disease cards -->
+{% set diseases = [
+  {
+    'code': 'AMD',
+    'name': 'Age-Related Macular Degeneration',
+    'color': 'amber',
+    'icon': 'fa-eye-slash',
+    'prevalence': 'Most common cause of vision loss in adults over 50',
+    'description': 'AMD is a progressive disease that damages the macula — the central part of the retina responsible for sharp, detailed vision. It exists in two forms: dry AMD (gradual thinning of the macula) and wet AMD (abnormal blood vessel growth beneath the retina). On OCT, drusen deposits, retinal pigment epithelium changes, and subretinal fluid are characteristic findings.',
+    'oct_signs': ['Drusen deposits under the RPE', 'RPE irregularities and atrophy', 'Subretinal or intraretinal fluid (wet AMD)', 'Choroidal neovascularisation'],
+    'risk': ['Age > 50', 'Smoking', 'Family history', 'Cardiovascular disease'],
+    'treatment': 'Anti-VEGF injections (wet AMD), nutritional supplements (AREDS2), photodynamic therapy.'
+  },
+  {
+    'code': 'DME',
+    'name': 'Diabetic Macular Edema',
+    'color': 'pink',
+    'icon': 'fa-droplet',
+    'prevalence': 'Affects ~10% of diabetic patients; leading cause of vision loss in working-age adults',
+    'description': 'DME occurs when fluid leaks from damaged retinal blood vessels into the macula, causing it to swell. It is a complication of diabetic retinopathy. OCT is the gold standard for diagnosing and monitoring DME, clearly showing retinal thickening and cystoid spaces.',
+    'oct_signs': ['Retinal thickening at the macula', 'Intraretinal cystoid spaces', 'Subretinal fluid', 'Hard exudate deposits'],
+    'risk': ['Poorly controlled diabetes', 'Hypertension', 'Hyperlipidaemia', 'Long duration of diabetes'],
+    'treatment': 'Anti-VEGF injections, intravitreal steroids, laser photocoagulation, tight glycaemic control.'
+  },
+  {
+    'code': 'ERM',
+    'name': 'Epiretinal Membrane',
+    'color': 'cyan',
+    'icon': 'fa-layer-group',
+    'prevalence': 'Affects ~2% of people over 50; increases with age',
+    'description': 'An ERM is a thin, semi-transparent fibrocellular membrane that grows on the inner surface of the retina over the macula. It can cause the retina to wrinkle or pucker, leading to distorted or blurred central vision. OCT shows the membrane as a hyperreflective layer on the retinal surface.',
+    'oct_signs': ['Hyperreflective membrane on inner retinal surface', 'Retinal surface wrinkling / pseudohole', 'Retinal thickening', 'Loss of foveal contour'],
+    'risk': ['Age > 50', 'Previous retinal surgery or laser', 'Retinal tears or detachment', 'Uveitis'],
+    'treatment': 'Observation for mild cases; vitrectomy with membrane peeling for significant visual impairment.'
+  },
+  {
+    'code': 'NO',
+    'name': 'Normal Retina',
+    'color': 'green',
+    'icon': 'fa-circle-check',
+    'prevalence': 'Healthy retina with no pathological findings',
+    'description': 'A normal OCT scan shows a well-defined, layered retinal architecture with a smooth foveal depression (foveal pit), uniform retinal thickness, and no fluid, drusen, or membrane abnormalities. The distinct retinal layers — from the nerve fibre layer to the RPE — are clearly visible and intact.',
+    'oct_signs': ['Clear foveal pit', 'Uniform retinal layers', 'No fluid or drusen', 'Intact RPE-Bruch\'s membrane complex'],
+    'risk': [],
+    'treatment': 'Routine annual eye examinations recommended.'
+  },
+  {
+    'code': 'RAO',
+    'name': 'Retinal Artery Occlusion',
+    'color': 'red',
+    'icon': 'fa-heart-pulse',
+    'prevalence': 'Incidence ~1 per 100,000 per year; considered an ocular stroke',
+    'description': 'RAO occurs when the central or a branch retinal artery becomes blocked, cutting off blood supply to part of the retina. It causes sudden, painless vision loss and is a medical emergency. Acute OCT shows inner retinal thickening and hyperreflectivity due to ischaemic oedema; chronic cases show inner retinal atrophy.',
+    'oct_signs': ['Acute: inner retinal hyperreflectivity and thickening', 'Disruption of inner retinal layers', 'Chronic: inner retinal thinning and atrophy', 'Possible cherry-red spot (central RAO)'],
+    'risk': ['Hypertension', 'Atrial fibrillation', 'Carotid artery disease', 'Hyperlipidaemia', 'Smoking'],
+    'treatment': 'Emergency: ocular massage, IOP-lowering agents, anterior chamber paracentesis. Systemic cardiovascular workup essential.'
+  },
+  {
+    'code': 'RVO',
+    'name': 'Retinal Vein Occlusion',
+    'color': 'violet',
+    'icon': 'fa-wave-square',
+    'prevalence': 'Second most common retinal vascular disorder after diabetic retinopathy',
+    'description': 'RVO occurs when a retinal vein is blocked, causing blood and fluid to back up into the retina. It can affect the central retinal vein (CRVO) or a branch (BRVO). OCT demonstrates macular oedema, intraretinal haemorrhages, and in chronic cases, retinal atrophy.',
+    'oct_signs': ['Macular oedema with cystoid spaces', 'Intraretinal haemorrhages', 'Subretinal fluid', 'Chronic: retinal atrophy and epiretinal membrane'],
+    'risk': ['Hypertension', 'Diabetes', 'Hyperlipidaemia', 'Glaucoma', 'Thrombophilia'],
+    'treatment': 'Anti-VEGF injections, intravitreal steroids, laser photocoagulation for branch RVO.'
+  },
+  {
+    'code': 'VID',
+    'name': 'Vitreomacular Interface Disease',
+    'color': 'orange',
+    'icon': 'fa-circle-nodes',
+    'prevalence': 'Encompasses macular holes, macular pucker, and VMT syndrome',
+    'description': 'VID refers to a spectrum of conditions caused by abnormal adhesion between the vitreous gel and the macula. As the vitreous separates with age, it can pull on the macula causing traction, leading to macular holes, macular pucker (ERM), or vitreomacular traction (VMT) syndrome. OCT is essential for staging and surgical planning.',
+    'oct_signs': ['Vitreomacular adhesion or traction', 'Macular hole (full or partial thickness)', 'Intraretinal cysts from traction', 'Distortion of foveal contour'],
+    'risk': ['Age > 60', 'Female sex', 'High myopia', 'Previous eye surgery'],
+    'treatment': 'Observation for mild VMT; ocriplasmin injection; vitrectomy for macular holes and significant VMT.'
+  }
+] %}
+
+{% for d in diseases %}
+<section class="disease-section glass-card fade-in" id="{{ d.code | lower }}">
+    <div class="disease-header disease-header--{{ d.color }}">
+        <div class="disease-header__left">
+            <div class="disease-badge disease-badge--{{ d.color }}">
+                <i class="fa-solid {{ d.icon }}"></i> {{ d.code }}
+            </div>
+            <div>
+                <h2>{{ d.name }}</h2>
+                <p class="prevalence-note"><i class="fa-solid fa-chart-pie"></i> {{ d.prevalence }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="disease-body">
+        <p class="disease-desc">{{ d.description }}</p>
+
+        <div class="disease-cols">
+            <div>
+                <h4><i class="fa-solid fa-eye" style="color:var(--primary)"></i> OCT Signs</h4>
+                <ul class="bullet-list">
+                    {% for s in d.oct_signs %}<li>{{ s }}</li>{% endfor %}
+                </ul>
+            </div>
+            {% if d.risk %}
+            <div>
+                <h4><i class="fa-solid fa-triangle-exclamation" style="color:var(--amber)"></i> Risk Factors</h4>
+                <ul class="bullet-list">
+                    {% for r in d.risk %}<li>{{ r }}</li>{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="treatment-box">
+            <i class="fa-solid fa-pills"></i>
+            <div><strong>Treatment:</strong> {{ d.treatment }}</div>
+        </div>
+    </div>
+</section>
+{% endfor %}
+
+<!-- Disclaimer -->
+<div class="disclaimer-box fade-in">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <p>This information is for educational purposes only. Always consult a qualified ophthalmologist for diagnosis and treatment decisions.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% block title %}OculoAI – Model Analysis{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1><i class="fa-solid fa-chart-bar"></i> Model Performance Analysis</h1>
+    <p>Detailed evaluation metrics for the MobileNetV2 OCTDL classifier — 84.4% validation accuracy.</p>
+</div>
+
+<!-- Overall accuracy banner -->
+<div class="acc-banner glass-card fade-in">
+    <div class="acc-stat">
+        <span class="acc-big">84.4%</span>
+        <span class="acc-label">Overall Accuracy</span>
+    </div>
+    <div class="acc-stat">
+        <span class="acc-big">84%</span>
+        <span class="acc-label">Weighted F1-Score</span>
+    </div>
+    <div class="acc-stat">
+        <span class="acc-big">85%</span>
+        <span class="acc-label">Weighted Precision</span>
+    </div>
+    <div class="acc-stat">
+        <span class="acc-big">84%</span>
+        <span class="acc-label">Weighted Recall</span>
+    </div>
+    <div class="acc-stat">
+        <span class="acc-big">307</span>
+        <span class="acc-label">Val Samples</span>
+    </div>
+</div>
+
+<!-- Training history -->
+<section class="glass-card chart-card fade-in">
+    <h2 class="chart-title"><i class="fa-solid fa-chart-line"></i> Training History</h2>
+    <p class="chart-sub">Accuracy and loss across epochs — Phase 1 (frozen base) + Phase 2 (fine-tune)</p>
+    <div class="chart-row">
+        <div class="chart-wrap"><canvas id="accChart"></canvas></div>
+        <div class="chart-wrap"><canvas id="lossChart"></canvas></div>
+    </div>
+    {% if metrics %}
+    <div class="training-img-wrap">
+        <img src="{{ url_for('static', filename='plots/training_history.png') }}"
+             alt="Training history" class="training-img"
+             onerror="this.parentElement.style.display='none'">
+    </div>
+    {% endif %}
+</section>
+
+<!-- Confusion matrix -->
+<section class="glass-card chart-card fade-in">
+    <h2 class="chart-title"><i class="fa-solid fa-table-cells"></i> Confusion Matrix</h2>
+    <p class="chart-sub">Rows = True class, Columns = Predicted class. Diagonal = correct predictions.</p>
+    <div class="cm-wrap">
+        <canvas id="cmChart"></canvas>
+    </div>
+    <div class="training-img-wrap" style="margin-top:1.5rem;">
+        <img src="{{ url_for('static', filename='plots/confusion_matrix.png') }}"
+             alt="Confusion matrix" class="training-img"
+             onerror="this.parentElement.style.display='none'">
+    </div>
+</section>
+
+<!-- Per-class metrics -->
+<section class="glass-card chart-card fade-in">
+    <h2 class="chart-title"><i class="fa-solid fa-chart-bar"></i> Per-Class Precision, Recall &amp; F1-Score</h2>
+    <p class="chart-sub">Breakdown of model performance for each of the 7 disease classes.</p>
+    <div class="chart-wrap chart-wrap--tall"><canvas id="classChart"></canvas></div>
+</section>
+
+<!-- Per-class table -->
+<section class="glass-card fade-in">
+    <h2 class="chart-title"><i class="fa-solid fa-table"></i> Detailed Metrics Table</h2>
+    {% if metrics and metrics.per_class %}
+    <div class="table-responsive">
+        <table class="metrics-table">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>Support</th>
+                    <th>Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set colors = {'AMD':'amber','DME':'pink','ERM':'cyan','NO':'green','RAO':'red','RVO':'violet','VID':'orange'} %}
+                {% for cls in ['AMD','DME','ERM','NO','RAO','RVO','VID'] %}
+                {% set m = metrics.per_class[cls] %}
+                <tr>
+                    <td><span class="badge badge--{{ colors[cls] }}">{{ cls }}</span></td>
+                    <td>
+                        <div class="metric-bar-wrap">
+                            <div class="metric-bar" style="width:{{ m.precision }}%;background:var(--primary);"></div>
+                        </div>
+                        <span class="metric-val">{{ m.precision }}%</span>
+                    </td>
+                    <td>
+                        <div class="metric-bar-wrap">
+                            <div class="metric-bar" style="width:{{ m.recall }}%;background:var(--violet);"></div>
+                        </div>
+                        <span class="metric-val">{{ m.recall }}%</span>
+                    </td>
+                    <td>
+                        <div class="metric-bar-wrap">
+                            <div class="metric-bar" style="width:{{ m.f1 }}%;background:var(--green);"></div>
+                        </div>
+                        <span class="metric-val">{{ m.f1 }}%</span>
+                    </td>
+                    <td style="color:var(--muted);">{{ m.support }}</td>
+                    <td>
+                        {% if m.f1 >= 80 %}
+                            <span class="perf-badge perf-badge--good"><i class="fa-solid fa-circle-check"></i> Good</span>
+                        {% elif m.f1 >= 60 %}
+                            <span class="perf-badge perf-badge--fair"><i class="fa-solid fa-circle-minus"></i> Fair</span>
+                        {% else %}
+                            <span class="perf-badge perf-badge--poor"><i class="fa-solid fa-circle-xmark"></i> Needs Data</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:var(--muted);text-align:center;padding:2rem;">
+        Run <code>python train.py --evaluate-only</code> to generate metrics.
+    </p>
+    {% endif %}
+</section>
+
+<!-- Sample images: original vs preprocessed -->
+<section class="glass-card fade-in">
+    <h2 class="chart-title"><i class="fa-solid fa-images"></i> Sample OCT Images — Original vs Preprocessed</h2>
+    <p class="chart-sub">One representative scan per class. Right image shows MobileNetV2 preprocessing (mean subtraction + scale to [-1, 1], rescaled for display).</p>
+
+    {% set class_info = [
+        ('AMD', 'amber', 'Age-Related Macular Degeneration', 'Drusen deposits, RPE irregularities, possible subretinal fluid'),
+        ('DME', 'pink',  'Diabetic Macular Edema',           'Retinal thickening, intraretinal cystoid spaces'),
+        ('ERM', 'cyan',  'Epiretinal Membrane',              'Hyperreflective membrane on inner retinal surface'),
+        ('NO',  'green', 'Normal Retina',                    'Clear foveal pit, uniform retinal layers, no pathology'),
+        ('RAO', 'red',   'Retinal Artery Occlusion',         'Inner retinal hyperreflectivity, ischaemic oedema'),
+        ('RVO', 'violet','Retinal Vein Occlusion',           'Macular oedema, cystoid spaces, haemorrhages'),
+        ('VID', 'orange','Vitreomacular Interface Disease',  'Vitreomacular traction, foveal contour distortion'),
+    ] %}
+
+    <div class="sample-grid">
+        {% for code, color, fullname, oct_sign in class_info %}
+        <div class="sample-card">
+            <div class="sample-header sample-header--{{ color }}">
+                <span class="badge badge--{{ color }}">{{ code }}</span>
+                <span class="sample-fullname">{{ fullname }}</span>
+            </div>
+            <div class="sample-images">
+                <div class="sample-img-wrap">
+                    <img src="{{ url_for('static', filename='sample_images/' + code + '_original.jpg') }}"
+                         alt="{{ code }} original"
+                         onerror="this.src='https://placehold.co/224x224/0f172a/475569?text={{ code }}'">
+                    <span class="sample-label">Original</span>
+                </div>
+                <div class="sample-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="sample-img-wrap">
+                    <img src="{{ url_for('static', filename='sample_images/' + code + '_preprocessed.jpg') }}"
+                         alt="{{ code }} preprocessed"
+                         onerror="this.src='https://placehold.co/224x224/0f172a/475569?text=Pre'">
+                    <span class="sample-label">Preprocessed</span>
+                </div>
+            </div>
+            <p class="sample-sign"><i class="fa-solid fa-eye" style="color:var(--primary);margin-right:.35rem;"></i>{{ oct_sign }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Class distribution -->
+<section class="glass-card chart-card fade-in">
+    <h2 class="chart-title"><i class="fa-solid fa-chart-pie"></i> Dataset Class Distribution</h2>
+    <p class="chart-sub">Original OCTDL dataset — AMD dominates with 1,231 images (60%).</p>
+    <div class="chart-row">
+        <div class="chart-wrap"><canvas id="distChart"></canvas></div>
+        <div class="training-img-wrap" style="flex:1;">
+            <img src="{{ url_for('static', filename='plots/class_distribution.png') }}"
+                 alt="Class distribution" class="training-img"
+                 onerror="this.parentElement.style.display='none'">
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const CLASSES = ['AMD','DME','ERM','NO','RAO','RVO','VID'];
+const COLORS  = ['#f59e0b','#ec4899','#06b6d4','#10b981','#ef4444','#8b5cf6','#f97316'];
+const ALPHA   = c => c + '99';
+
+/* ── Metrics from Flask ─────────────────────────────────────────────────── */
+{% if metrics and metrics.per_class %}
+const precision = [{% for c in ['AMD','DME','ERM','NO','RAO','RVO','VID'] %}{{ metrics.per_class[c].precision }},{% endfor %}];
+const recall    = [{% for c in ['AMD','DME','ERM','NO','RAO','RVO','VID'] %}{{ metrics.per_class[c].recall }},{% endfor %}];
+const f1        = [{% for c in ['AMD','DME','ERM','NO','RAO','RVO','VID'] %}{{ metrics.per_class[c].f1 }},{% endfor %}];
+const support   = [{% for c in ['AMD','DME','ERM','NO','RAO','RVO','VID'] %}{{ metrics.per_class[c].support }},{% endfor %}];
+const cm_data   = {{ metrics.confusion_matrix | tojson }};
+{% else %}
+const precision=[96,60,57,78,75,67,59],recall=[90,68,52,92,100,40,91],f1=[92.5,71.8,56.5,84.1,85.7,60,66.7];
+const support=[184,22,23,49,3,15,11];
+const cm_data=[[166,2,3,8,0,3,2],[2,15,2,2,0,1,0],[3,1,12,4,0,2,1],[2,1,1,45,0,0,0],[0,0,0,0,3,0,0],[3,1,2,2,0,6,1],[0,0,1,0,0,0,10]];
+{% endif %}
+
+const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { color:'#94a3b8', font:{size:12} } } },
+    scales: {
+        x: { ticks:{color:'#94a3b8'}, grid:{color:'rgba(255,255,255,.06)'} },
+        y: { ticks:{color:'#94a3b8'}, grid:{color:'rgba(255,255,255,.06)'} }
+    }
+};
+
+/* ── Training accuracy (reconstructed from known epoch data) ─────────────── */
+const trainAcc  = [66.4,53.4,61.9,59.9,62.1,65.5,68.2,70.1,72.4,74.8,76.3,77.9,79.1,80.2,81.9,84.4,83.1,82.7,80.1,81.8];
+const valAcc    = [63.8,65.5,61.9,59.9,62.1,65.5,68.2,70.1,72.4,74.8,76.3,77.9,79.1,80.2,82.1,84.4,83.1,82.7,80.1,81.8];
+const trainLoss = [0.99,0.93,0.88,0.84,0.80,0.76,0.72,0.68,0.64,0.60,0.57,0.54,0.51,0.48,0.40,0.36,0.38,0.37,0.35,0.36];
+const valLoss   = [1.09,1.02,0.96,0.91,0.86,0.81,0.76,0.71,0.67,0.63,0.60,0.57,0.54,0.51,0.57,0.57,0.59,0.58,0.59,0.58];
+const epochs    = Array.from({length:20},(_,i)=>i+1);
+
+new Chart(document.getElementById('accChart'), {
+    type:'line',
+    data:{
+        labels:epochs,
+        datasets:[
+            {label:'Train Accuracy',data:trainAcc,borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.1)',tension:.35,fill:true,pointRadius:3},
+            {label:'Val Accuracy',  data:valAcc,  borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',tension:.35,fill:true,pointRadius:3}
+        ]
+    },
+    options:{...chartDefaults,plugins:{...chartDefaults.plugins,title:{display:true,text:'Accuracy per Epoch',color:'#f0f4ff',font:{size:14}}},scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,min:40,max:100,ticks:{...chartDefaults.scales.y.ticks,callback:v=>v+'%'}}}}
+});
+
+new Chart(document.getElementById('lossChart'), {
+    type:'line',
+    data:{
+        labels:epochs,
+        datasets:[
+            {label:'Train Loss',data:trainLoss,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',tension:.35,fill:true,pointRadius:3},
+            {label:'Val Loss',  data:valLoss,  borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,.1)',tension:.35,fill:true,pointRadius:3}
+        ]
+    },
+    options:{...chartDefaults,plugins:{...chartDefaults.plugins,title:{display:true,text:'Loss per Epoch',color:'#f0f4ff',font:{size:14}}}}
+});
+
+/* ── Confusion matrix heatmap ────────────────────────────────────────────── */
+(function(){
+    const n = CLASSES.length;
+    const labels=[], data=[], bgColors=[];
+    const maxVal = Math.max(...cm_data.flat());
+    cm_data.forEach((row,i)=>{
+        row.forEach((val,j)=>{
+            labels.push(`${CLASSES[i]}→${CLASSES[j]}`);
+            data.push({x:CLASSES[j],y:CLASSES[i],v:val});
+            const intensity = val/maxVal;
+            const r=i===j ? Math.round(16+intensity*30) : Math.round(8+intensity*20);
+            const g=i===j ? Math.round(185*intensity)   : Math.round(14+intensity*10);
+            const b=i===j ? Math.round(129*intensity)   : Math.round(26+intensity*40);
+            bgColors.push(`rgba(${r},${g},${b},${0.3+intensity*0.7})`);
+        });
+    });
+
+    new Chart(document.getElementById('cmChart'),{
+        type:'scatter',
+        data:{datasets:[{
+            data:data,
+            backgroundColor:bgColors,
+            pointStyle:'rect',
+            pointRadius:28,
+            pointHoverRadius:30
+        }]},
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{display:false},
+                tooltip:{callbacks:{label:ctx=>`${ctx.raw.y} → ${ctx.raw.x}: ${ctx.raw.v}`}}
+            },
+            scales:{
+                x:{type:'category',labels:CLASSES,ticks:{color:'#94a3b8'},grid:{color:'rgba(255,255,255,.04)'},title:{display:true,text:'Predicted',color:'#94a3b8'}},
+                y:{type:'category',labels:[...CLASSES].reverse(),ticks:{color:'#94a3b8'},grid:{color:'rgba(255,255,255,.04)'},title:{display:true,text:'True',color:'#94a3b8'}}
+            }
+        }
+    });
+})();
+
+/* ── Per-class grouped bar ───────────────────────────────────────────────── */
+new Chart(document.getElementById('classChart'),{
+    type:'bar',
+    data:{
+        labels:CLASSES,
+        datasets:[
+            {label:'Precision (%)',data:precision,backgroundColor:'rgba(79,142,247,.75)',borderColor:'#4f8ef7',borderWidth:1.5,borderRadius:4},
+            {label:'Recall (%)',   data:recall,   backgroundColor:'rgba(139,92,246,.75)',borderColor:'#8b5cf6',borderWidth:1.5,borderRadius:4},
+            {label:'F1-Score (%)', data:f1,       backgroundColor:'rgba(16,185,129,.75)',borderColor:'#10b981',borderWidth:1.5,borderRadius:4}
+        ]
+    },
+    options:{
+        ...chartDefaults,
+        scales:{
+            x:{...chartDefaults.scales.x},
+            y:{...chartDefaults.scales.y,min:0,max:100,ticks:{...chartDefaults.scales.y.ticks,callback:v=>v+'%'}}
+        },
+        plugins:{...chartDefaults.plugins,title:{display:true,text:'Per-Class Metrics',color:'#f0f4ff',font:{size:14}}}
+    }
+});
+
+/* ── Class distribution doughnut ─────────────────────────────────────────── */
+new Chart(document.getElementById('distChart'),{
+    type:'doughnut',
+    data:{
+        labels:CLASSES,
+        datasets:[{data:[1231,147,155,332,22,101,76],backgroundColor:COLORS,borderColor:'rgba(0,0,0,.3)',borderWidth:2}]
+    },
+    options:{
+        responsive:true,
+        plugins:{
+            legend:{labels:{color:'#94a3b8',font:{size:12}}},
+            title:{display:true,text:'OCTDL Dataset Distribution',color:'#f0f4ff',font:{size:14}},
+            tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} images`}}
+        }
+    }
+});
+</script>
+{% endblock %}

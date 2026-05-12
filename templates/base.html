@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OculoAI – OCT Eye Disease Detection{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fa-solid fa-eye"></i> OculoAI
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('index') }}"       class="{% if request.endpoint=='index'       %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="{{ url_for('information') }}" class="{% if request.endpoint=='information' %}active{% endif %}"><i class="fa-solid fa-book-medical"></i> Information</a></li>
+                <li><a href="{{ url_for('predict') }}"     class="{% if request.endpoint=='predict'     %}active{% endif %}"><i class="fa-solid fa-magnifying-glass"></i> Predict</a></li>
+                <li><a href="{{ url_for('analysis') }}"    class="{% if request.endpoint=='analysis'    %}active{% endif %}"><i class="fa-solid fa-chart-bar"></i> Analysis</a></li>
+                <li><a href="{{ url_for('history') }}"     class="{% if request.endpoint=='history'     %}active{% endif %}"><i class="fa-solid fa-clock-rotate-left"></i> History</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-wrap">
+                {% for m in messages %}
+                <div class="alert"><i class="fa-solid fa-circle-exclamation"></i> {{ m }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span class="logo" style="font-size:1.1rem;"><i class="fa-solid fa-eye"></i> OculoAI</span>
+            <p>OCT Eye Disease Detection &nbsp;·&nbsp; MobileNetV2 &nbsp;·&nbsp; <strong>84.4% Accuracy</strong></p>
+            <p style="font-size:.8rem;opacity:.5;">&copy; 2026 OculoAI. For informational purposes only.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

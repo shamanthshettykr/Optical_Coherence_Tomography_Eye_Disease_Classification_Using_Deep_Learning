@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}OculoAI – Home{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content fade-in">
+        <div class="hero-badge"><i class="fa-solid fa-circle-check"></i> 84.4% Validation Accuracy</div>
+        <h1>AI-Powered OCT<br><span class="gradient-text">Eye Disease Detection</span></h1>
+        <p class="hero-sub">
+            Upload a retinal OCT scan and get instant AI analysis for 7 conditions —
+            AMD, DME, ERM, RAO, RVO, VID, or Normal — powered by MobileNetV2 deep learning.
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-magnifying-glass"></i> Analyse a Scan
+            </a>
+            <a href="{{ url_for('information') }}" class="btn btn-outline btn-lg">
+                <i class="fa-solid fa-book-medical"></i> Learn About OCT
+            </a>
+        </div>
+    </div>
+    <div class="hero-visual fade-in" style="animation-delay:.2s">
+        <div class="eye-ring">
+            <i class="fa-solid fa-eye hero-eye"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Stats strip -->
+<section class="stats-strip fade-in" style="animation-delay:.3s">
+    <div class="stat-card">
+        <span class="stat-num">84.4%</span>
+        <span class="stat-label">Val Accuracy</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-num">7</span>
+        <span class="stat-label">Disease Classes</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-num">2,064</span>
+        <span class="stat-label">Training Images</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-num">5×</span>
+        <span class="stat-label">TTA Passes</span>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="section fade-in" style="animation-delay:.4s">
+    <h2 class="section-title">How It Works</h2>
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-icon"><i class="fa-solid fa-upload"></i></div>
+            <h3>1. Upload</h3>
+            <p>Drag and drop your retinal OCT scan image (JPG or PNG).</p>
+        </div>
+        <div class="step-card">
+            <div class="step-icon"><i class="fa-solid fa-brain"></i></div>
+            <h3>2. Analyse</h3>
+            <p>MobileNetV2 processes the scan with 5-pass test-time augmentation.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-icon"><i class="fa-solid fa-file-medical"></i></div>
+            <h3>3. Results</h3>
+            <p>Get the predicted condition, confidence score, and clinical guidance.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Disease cards preview -->
+<section class="section fade-in" style="animation-delay:.5s">
+    <h2 class="section-title">Detectable Conditions</h2>
+    <div class="disease-grid">
+        {% set diseases = [
+            ('AMD','fa-eye-slash','amber','Age-Related Macular Degeneration'),
+            ('DME','fa-droplet','pink','Diabetic Macular Edema'),
+            ('ERM','fa-layer-group','cyan','Epiretinal Membrane'),
+            ('NO','fa-circle-check','green','Normal Retina'),
+            ('RAO','fa-heart-pulse','red','Retinal Artery Occlusion'),
+            ('RVO','fa-wave-square','violet','Retinal Vein Occlusion'),
+            ('VID','fa-circle-nodes','orange','Vitreomacular Interface Disease'),
+        ] %}
+        {% for code, icon, color, name in diseases %}
+        <div class="disease-card disease-card--{{ color }}">
+            <i class="fa-solid {{ icon }} disease-card__icon"></i>
+            <span class="disease-card__code">{{ code }}</span>
+            <span class="disease-card__name">{{ name }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <div style="text-align:center;margin-top:2rem;">
+        <a href="{{ url_for('information') }}" class="btn btn-outline">
+            <i class="fa-solid fa-arrow-right"></i> Read Full Details
+        </a>
+    </div>
+</section>
+{% endblock %}

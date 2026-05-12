@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}OculoAI – Predict{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1><i class="fa-solid fa-magnifying-glass"></i> OCT Scan Analysis</h1>
+    <p>Upload a retinal OCT image to receive an AI-powered disease prediction.</p>
+</div>
+
+<div class="predict-layout fade-in">
+    <!-- Upload card -->
+    <div class="glass-card upload-card">
+        <form action="{{ url_for('predict') }}" method="POST"
+              enctype="multipart/form-data" id="uploadForm">
+
+            <div class="upload-zone" id="dropZone">
+                <input type="file" name="file" id="fileInput"
+                       accept=".png,.jpg,.jpeg" hidden>
+
+                <div class="upload-content" id="uploadContent">
+                    <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                    <h3>Drag &amp; Drop your OCT scan</h3>
+                    <p>or <span class="link-text">click to browse</span></p>
+                    <span class="file-limits">JPG · JPEG · PNG</span>
+                </div>
+
+                <div class="preview-container hidden" id="previewContainer">
+                    <img id="imagePreview" src="" alt="Preview">
+                    <button type="button" class="remove-btn" id="removeBtn">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="submitBtn" disabled>
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Analyse Scan
+            </button>
+
+            <div class="loader-container hidden" id="loader">
+                <div class="spinner"></div>
+                <p>Analysing retinal structures…</p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tips card -->
+    <div class="glass-card tips-card">
+        <h3><i class="fa-solid fa-lightbulb" style="color:var(--amber)"></i> Tips for Best Results</h3>
+        <ul class="tips-list">
+            <li><i class="fa-solid fa-check"></i> Use a clear, high-resolution OCT scan</li>
+            <li><i class="fa-solid fa-check"></i> Ensure the image is not blurry or rotated</li>
+            <li><i class="fa-solid fa-check"></i> Grayscale or colour OCT images both work</li>
+            <li><i class="fa-solid fa-check"></i> Avoid heavily compressed or watermarked images</li>
+            <li><i class="fa-solid fa-check"></i> The model was trained on OCTDL dataset images</li>
+        </ul>
+
+        <div class="model-info">
+            <h4><i class="fa-solid fa-microchip"></i> Model Details</h4>
+            <div class="model-stats">
+                <div class="model-stat"><span>Architecture</span><strong>MobileNetV2</strong></div>
+                <div class="model-stat"><span>Accuracy</span><strong>84.4%</strong></div>
+                <div class="model-stat"><span>Classes</span><strong>7</strong></div>
+                <div class="model-stat"><span>TTA Passes</span><strong>5×</strong></div>
+                <div class="model-stat"><span>Input Size</span><strong>224 × 224</strong></div>
+                <div class="model-stat"><span>Dataset</span><strong>OCTDL</strong></div>
+            </div>
+        </div>
+
+        <div class="class-chips">
+            {% for code, color in [('AMD','amber'),('DME','pink'),('ERM','cyan'),('NO','green'),('RAO','red'),('RVO','violet'),('VID','orange')] %}
+            <span class="chip chip--{{ color }}">{{ code }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

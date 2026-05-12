@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}OculoAI – Result{% endblock %}
+
+{% block content %}
+<div class="result-wrap fade-in">
+
+    <div class="result-topbar">
+        <h1><i class="fa-solid fa-eye"></i> Analysis Complete</h1>
+        <a href="{{ url_for('predict') }}" class="btn btn-outline btn-sm">
+            <i class="fa-solid fa-arrow-left"></i> Analyse Another
+        </a>
+    </div>
+
+    <div class="result-grid">
+        <!-- Scan image -->
+        <div class="glass-card result-image-card">
+            <h3 class="card-label">Uploaded Scan</h3>
+            <div class="scan-img-wrap">
+                <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="OCT Scan">
+            </div>
+        </div>
+
+        <!-- Prediction -->
+        <div class="glass-card result-pred-card">
+            <p class="card-label">Detection Result</p>
+            <div class="disease-name {{ short_class | lower }}">{{ prediction }}</div>
+
+            <div class="conf-box">
+                <div class="conf-header">
+                    <span>Confidence Score</span>
+                    <span class="conf-value">{{ confidence }}%</span>
+                </div>
+                <div class="conf-track">
+                    <div class="conf-fill" style="width:{{ confidence }}%;"></div>
+                </div>
+            </div>
+
+            <div class="result-info-box">
+                <h4><i class="fa-solid fa-circle-info"></i> About {{ prediction }}</h4>
+                <p>{{ description }}</p>
+            </div>
+
+            <div class="result-prec-box">
+                <h4><i class="fa-solid fa-shield-heart"></i> Recommended Actions</h4>
+                <ul class="prec-list">
+                    {% for item in precautions %}
+                    <li><i class="fa-solid fa-check"></i> {{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="result-disclaimer">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <strong>Disclaimer:</strong> This tool is for informational purposes only.
+                Always consult a qualified ophthalmologist for diagnosis and treatment.
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA row -->
+    <div class="result-cta">
+        <a href="{{ url_for('analysis') }}" class="btn btn-outline">
+            <i class="fa-solid fa-chart-bar"></i> View Model Analytics
+        </a>
+        <a href="{{ url_for('history') }}" class="btn btn-outline">
+            <i class="fa-solid fa-clock-rotate-left"></i> View History
+        </a>
+    </div>
+</div>
+{% endblock %}
