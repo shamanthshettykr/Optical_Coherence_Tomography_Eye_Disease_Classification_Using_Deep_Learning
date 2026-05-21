@@ -1,4 +1,4 @@
-# OculoAI – OCT Eye Disease Detection
+# RetinaScan AI  OCT Eye Disease Detection
 
 An AI-powered web application for detecting 7 retinal diseases from OCT scans using MobileNetV2 deep learning.
 
@@ -20,11 +20,11 @@ An AI-powered web application for detecting 7 retinal diseases from OCT scans us
 | VID  | Vitreomacular Interface Disease | 90.9% |
 
 ## Pages
-- **Home** – Overview and disease cards
-- **Information** – Full OCT guide for all 7 conditions
-- **Predict** – Upload OCT scan and get AI prediction
-- **Analysis** – Confusion matrix, accuracy/loss curves, per-class F1/precision/recall, sample images
-- **History** – All past predictions
+- **Home**  Overview and disease cards
+- **Information**  Full OCT guide for all 7 conditions
+- **Predict**  Upload OCT scan and get AI prediction
+- **Analysis**  Confusion matrix, accuracy/loss curves, per-class F1/precision/recall, sample images
+- **History**  All past predictions
 
 ## Setup
 
@@ -63,18 +63,18 @@ Eye Disease Detection/
 +-- database.py         # SQLAlchemy models
 +-- requirements.txt
 +-- static/
-¦   +-- css/style.css
-¦   +-- js/script.js
-¦   +-- sample_images/  # Sample OCT scans per class
-¦   +-- data/metrics.json
+   +-- css/style.css
+   +-- js/script.js
+   +-- sample_images/  # Sample OCT scans per class
+   +-- data/metrics.json
 +-- templates/
-¦   +-- base.html
-¦   +-- index.html
-¦   +-- information.html
-¦   +-- predict.html
-¦   +-- result.html
-¦   +-- analysis.html
-¦   +-- history.html
+   +-- base.html
+   +-- index.html
+   +-- information.html
+   +-- predict.html
+   +-- result.html
+   +-- analysis.html
+   +-- history.html
 +-- plots/              # Training plots
 `
 
